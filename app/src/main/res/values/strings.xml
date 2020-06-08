@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">TransactionalSMSTracker</string>
+
+    <string name="permission_request_msg">This App will help you to filter finance related SMS from your phone. So, please allow this app to read your SMS</string>
+</resources>
