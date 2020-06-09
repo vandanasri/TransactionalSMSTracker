@@ -28,4 +28,7 @@ task clean(type: Delete) {
 ext{
     // Core
     support_library_version = '1.0.0'
+
+    // Dagger
+    dagger_version = '2.21'
 }
