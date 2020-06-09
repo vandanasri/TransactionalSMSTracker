@@ -3,15 +3,11 @@ package com.example.transactionalsmstracker.ui
 import android.Manifest
 import android.content.DialogInterface
 import android.content.pm.PackageManager
-import android.database.Cursor
-import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.transactionalsmstracker.R
@@ -21,9 +17,6 @@ import com.example.transactionalsmstracker.utils.AlertDialogUtil
 import com.example.transactionalsmstracker.utils.PermissionUtil
 import com.example.transactionalsmstracker.utils.Status
 import kotlinx.android.synthetic.main.activity_main.*
-import java.text.SimpleDateFormat
-import java.util.*
-import kotlin.collections.ArrayList
 
 
 class MainActivity : BaseActivity<MainActivityViewModel>() {
@@ -33,7 +26,7 @@ class MainActivity : BaseActivity<MainActivityViewModel>() {
         super.onCreate(savedInstanceState)
 
         //Checking for SMS Read permission
-        if (android.os.Build.VERSION.SDK_INT >= 23) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ) {
             if (PermissionUtil.requestReadSmsPermission(this,
                     "This App will help you to filter finance related SMS from your phone. So, please allow this app to read your SMS",
                     DialogInterface.OnClickListener { dialog, which ->
