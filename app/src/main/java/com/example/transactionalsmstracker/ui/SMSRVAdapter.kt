@@ -5,8 +5,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.transactionalsmstracker.R
+import com.example.transactionalsmstracker.model.SMSData
+import kotlinx.android.synthetic.main.item_view.view.*
 
-class SMSRVAdapter : RecyclerView.Adapter<SMSRVAdapter.SMSViewHolder>()
+class SMSRVAdapter(private val listOfSMS : ArrayList<SMSData>) : RecyclerView.Adapter<SMSRVAdapter.SMSViewHolder>()
 {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SMSViewHolder {
@@ -15,19 +17,21 @@ class SMSRVAdapter : RecyclerView.Adapter<SMSRVAdapter.SMSViewHolder>()
     }
 
     override fun getItemCount(): Int {
-        return 10
+        return listOfSMS.size
     }
 
     override fun onBindViewHolder(holder: SMSViewHolder, position: Int) {
-
+        holder.bindData(listOfSMS[position])
     }
 
 
     class SMSViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
     {
-        fun bindData()
+        fun bindData(data : SMSData)
         {
-
+            itemView.tvTitle.text = data.sender
+            itemView.tvDate.text = data.date
+            itemView.tvDesc.text = data.messageText
         }
     }
 }

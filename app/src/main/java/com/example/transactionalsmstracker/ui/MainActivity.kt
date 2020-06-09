@@ -7,39 +7,84 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.transactionalsmstracker.R
+import com.example.transactionalsmstracker.di.component.ActivityComponent
+import com.example.transactionalsmstracker.ui.base.BaseActivity
 import com.example.transactionalsmstracker.utils.AlertDialogUtil
 import com.example.transactionalsmstracker.utils.PermissionUtil
+import com.example.transactionalsmstracker.utils.Status
+import kotlinx.android.synthetic.main.activity_main.*
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity<MainActivityViewModel>() {
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
 
-        if (PermissionUtil.requestReadSmsPermission(this,
-                "This App will help you to filter finance related SMS from your phone. So, please allow this app to read your SMS",
-                DialogInterface.OnClickListener { dialog, which ->
-                    // YOUR CANCEL CODE
-                })
-        ) {
+        //Checking for SMS Read permission
+        if (android.os.Build.VERSION.SDK_INT >= 23) {
+            if (PermissionUtil.requestReadSmsPermission(this,
+                    "This App will help you to filter finance related SMS from your phone. So, please allow this app to read your SMS",
+                    DialogInterface.OnClickListener { dialog, which ->
+                        // YOUR CANCEL CODE
+                    })
+            ) {
 
-            readMessages()
-            // YOUR BASE METHOD
+                // Permission already granted, read sms and display
+                viewModel.readMessages(this.contentResolver)
+            }
+        }else{
+            viewModel.readMessages(this.contentResolver)
         }
+    }
+
+    override fun injectDependencies(activityComponent: ActivityComponent) = activityComponent.inject(this)
+
+    override fun provideLayoutId(): Int = R.layout.activity_main
+
+    //initialize layout manager and recyclerview
+    override fun setupView(savedInstanceState: Bundle?) {
+        val linearLayoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
+        rv_repository.layoutManager = linearLayoutManager
+        val adapter = SMSRVAdapter(ArrayList())
+        rv_repository.adapter = adapter
+    }
+
+    override fun setupObserver() {
+        super.setupObserver()
+
+        viewModel.loadingProgressBar.observe(this, androidx.lifecycle.Observer {
+            when(it.status){
+                Status.LOADING -> progressBar.visibility = View.VISIBLE
+                Status.SUCCESS -> progressBar.visibility = View.GONE
+                Status.ERROR -> progressBar.visibility = View.GONE
+                else -> progressBar.visibility = View.GONE
+            }
+
+        })
+
+        //Observe live data which is coming from view model and then passing it to recyclerview adapter
+        viewModel.smsData.observe(this, androidx.lifecycle.Observer {
+            rv_repository.adapter = SMSRVAdapter(it)
+        })
     }
 
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         if(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
             Log.v("msg", "permission granted");
-            readMessages()
+            viewModel.readMessages(this.contentResolver)
         }else{
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_SMS)) {
                 // user denied flagging NEVER ASK AGAIN
@@ -49,32 +94,5 @@ class MainActivity : AppCompatActivity() {
 
         }
     }
-
-
-    //Method to read transactional Sms
-    private fun readMessages() {
-        val formatter = SimpleDateFormat("dd/MM/yyyy")
-        val cursor: Cursor? = this.contentResolver.query(Uri.parse("content://sms/inbox"), null, null, null, null)
-        if (cursor != null) {
-            if (cursor.moveToFirst()) { // must check the result to prevent exception
-                do {
-                    val msgData: String = cursor.getString(cursor.getColumnIndexOrThrow("body")).toString()
-                    val date: String = cursor.getString(cursor.getColumnIndexOrThrow("date")).toString()
-                    val add: String = cursor.getString(2)
-                   val dateVal = formatter.format(Date(date.toLong()))
-                    if (msgData.contains("credited") || msgData.contains("debited") || msgData.contains(
-                            "withdrawn"
-                        )
-                    ) {
-                        Log.v("Date Value",dateVal + " Msg:" + msgData + "Msg from: " + add)
-
-                    }
-                } while (cursor.moveToNext())
-            } else {
-               Toast.makeText(this,"Inbox is empty, no SMS", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
 
 }
