@@ -6,17 +6,20 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.example.transactionalsmstracker.model.SMSData
+import com.example.transactionalsmstracker.remote.PostSMSDataRepo
 import com.example.transactionalsmstracker.ui.base.BaseViewModel
 import com.example.transactionalsmstracker.utils.Resource
 import com.example.transactionalsmstracker.utils.Status
 import com.example.transactionalsmstracker.utils.network.NetworkHelper
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
 class MainActivityViewModel(compositeDisposable: CompositeDisposable,
-                            networkHelper: NetworkHelper)
+                            networkHelper: NetworkHelper,
+    private val postSMSDataRepo: PostSMSDataRepo)
     :BaseViewModel(compositeDisposable, networkHelper) {
 
     val loadingProgressBar = MutableLiveData<Resource<Status>>()
@@ -52,6 +55,31 @@ class MainActivityViewModel(compositeDisposable: CompositeDisposable,
         }
         else{
             loadingProgressBar.postValue(Resource.error())
+        }
+    }
+
+
+    //method to post sms data to server
+    fun postSMSData(apiKey : String, listOfSMS : ArrayList<SMSData>)
+    {
+        if (checkInternetConnection()) {
+            loadingProgressBar.postValue(Resource.loading())
+            compositeDisposable.add(
+                postSMSDataRepo.postSMSData(apiKey, listOfSMS)
+                    .subscribeOn(Schedulers.io())
+                    .doOnSuccess {
+
+                    }
+                    .subscribe(
+                        {
+                            loadingProgressBar.postValue(Resource.success())
+                        },
+                        {
+                            loadingProgressBar.postValue(Resource.error())
+                            handleNetworkError(it)
+                        })
+
+            )
         }
     }
 

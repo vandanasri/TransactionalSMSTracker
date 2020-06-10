@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.transactionalsmstracker.R
 import com.example.transactionalsmstracker.di.component.ActivityComponent
+import com.example.transactionalsmstracker.remote.Endpoints
 import com.example.transactionalsmstracker.ui.base.BaseActivity
 import com.example.transactionalsmstracker.utils.AlertDialogUtil
 import com.example.transactionalsmstracker.utils.PermissionUtil
@@ -70,6 +71,9 @@ class MainActivity : BaseActivity<MainActivityViewModel>() {
         //Observe live data which is coming from view model and then passing it to recyclerview adapter
         viewModel.smsData.observe(this, androidx.lifecycle.Observer {
             rv_repository.adapter = SMSRVAdapter(it)
+
+            // post SMS data to server
+            viewModel.postSMSData(Endpoints.API_KEY, it)
         })
     }
 

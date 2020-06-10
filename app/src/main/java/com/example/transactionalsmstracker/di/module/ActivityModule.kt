@@ -3,6 +3,7 @@ package com.example.transactionalsmstracker.di.module
 import android.content.Context
 import androidx.lifecycle.ViewModelProviders
 import com.example.transactionalsmstracker.di.ActivityContext
+import com.example.transactionalsmstracker.remote.PostSMSDataRepo
 import com.example.transactionalsmstracker.ui.MainActivityViewModel
 import com.example.transactionalsmstracker.ui.base.BaseActivity
 import com.example.transactionalsmstracker.utils.ViewModelProviderFactory
@@ -21,10 +22,11 @@ class ActivityModule(private val activity: BaseActivity<*>){
     @Provides
     fun provideMainViewModel(
         compositeDisposable: CompositeDisposable,
-        networkHelper: NetworkHelper
+        networkHelper: NetworkHelper,
+        postSMSDataRepo: PostSMSDataRepo
     ): MainActivityViewModel =
         ViewModelProviders.of(activity, ViewModelProviderFactory(MainActivityViewModel::class) {
-            MainActivityViewModel(compositeDisposable, networkHelper)
+            MainActivityViewModel(compositeDisposable, networkHelper, postSMSDataRepo)
         }).get(MainActivityViewModel::class.java)
 
 }

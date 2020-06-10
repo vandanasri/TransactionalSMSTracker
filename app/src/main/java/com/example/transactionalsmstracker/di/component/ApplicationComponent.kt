@@ -5,6 +5,7 @@ import android.content.Context
 import com.example.transactionalsmstracker.TransactionalSMSTrackerApplication
 import com.example.transactionalsmstracker.di.ApplicationContext
 import com.example.transactionalsmstracker.di.module.ApplicationModule
+import com.example.transactionalsmstracker.remote.NetworkService
 import com.example.transactionalsmstracker.utils.network.NetworkHelper
 import dagger.Component
 import io.reactivex.disposables.CompositeDisposable
@@ -25,4 +26,6 @@ interface ApplicationComponent {
     fun getCompositeDisposable() : CompositeDisposable
 
     fun getNetworkHelper(): NetworkHelper
+
+    fun getNetworkService(): NetworkService
 }
